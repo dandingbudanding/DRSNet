@@ -17,4 +17,8 @@ sudo python3 --action="test" --choose_net="NET"
 to change datasets:
 just change the fold name of datasets in main.py file
 
-any problems, youcan contact with me, my email is 2463908977@qq.com.
+to get UAS dataset:https://pan.baidu.com/s/1IWSVKYBrYwxaRThPfDsDGg
+to get BPS dataset:http://www.cbsr.ia.ac.cn/users/ynyu/dataset/
+
+
+any problems, you can contact with me, my email is 2463908977@qq.com.
