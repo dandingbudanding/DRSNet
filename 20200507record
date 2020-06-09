@@ -1,0 +1,21 @@
+# UAS withrain:
+BiSenET: 12.40 | 2.02:average acc:0.891814  average miou:0.896229 Took 0.004267376044700886 s/perimage FPS 234.33603917840176
+CGNet:0.49 | 0.32:average acc:0.926994  average miou:0.903544 Took 0.015054182946495128 s/perimage FPS 66.4267203045262
+LEDNET:  0.92 | 0.53:average acc:0.933808  average miou:0.877942 Took 0.015853016354073553 s/perimage FPS 63.07947823084422
+dfanet:2.09 | 0.10:average acc:0.875098  average miou:0.833602 Took 0.02444492387921085 s/perimage FPS 40.90828856499114
+MultiscaleSE:0.54 | 0.20:average acc:0.946441  average miou:0.921339 Took 0.0064163970349350695 s/perimage FPS 155.85070477330888
+Enet:0.35 | 0.19:average acc:0.935536  average miou:0.917971 Took 0.01344427718637879 s/perimage FPS 74.38109064079403
+segnet:29.44 | 15.04：average acc:0.953691  average miou:0.934581 Took 0.004907832997719696 s/perimage FPS 203.75591436477677
+
+
+# Icome withrain:
+BiSenET: 12.40 | 2.02:average acc:0.788156  average miou:0.777919 Took 0.00479724194480584  s/perimage  FPS 247.1990405303503
+CGNet:0.49 | 0.32:average acc:0.768519  average miou:0.764177 Took 0.014551619171653095 s/perimage FPS 81.49427166552474
+LEDNET:  0.92 | 0.53:NAN
+dfanet:2.09 | 0.10:average acc:0.637042  average miou:0.631733 Took 0.02447203588308455 s/perimage FPS 48.458314282206885
+MultiscaleSE:0.54 | 0.20:average acc:0.848589  average miou:0.825192 Took 0.0059825722612856045s/perimage FPS 198.2213593343411
+
+Enet:0.35 | 0.19:average acc:0.825037  average miou:0.820951 Took 0.013200299447353887 s/perimage FPS 89.83687155564292
+segnet:29.44 | 15.04：average acc:0.882970  average miou:0.850327 Took 0.005080681751208678 s/perimage  FPS 233.40836210924644
+ 
+ 
