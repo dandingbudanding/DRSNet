@@ -65,7 +65,7 @@ def train_model(model, criterion, optimizer, dataload, lr_scheduler):
         dataset_size = len(dataload.dataset)
         epoch_loss = 0
         step = 0  # minibatch数
-        for x, y in dataload:  # 分100次遍历数据集，每次遍历batch_size=4
+        for x, y in dataload:  # 遍历数据集，每次遍历batch_size=4
             optimizer.zero_grad()  # 每次minibatch都要将梯度(dw,db,...)清零
             inputs = x.to(device)
             labels = y.to(device)
@@ -128,9 +128,9 @@ def train():
     if args.choose_net=="My_Unet":
         model = my_unet.My_Unet2(3, 1).to(device)
     elif args.choose_net=="Enet":
-        model = enet.ENet(num_classes=13).to(device)
+        model = enet.ENet(num_classes=1).to(device)
     elif args.choose_net=="Segnet":
-        model = segnet.SegNet(3,13).to(device)
+        model = segnet.SegNet(3,1).to(device)
     elif args.choose_net == "CascadNet":
         model = my_cascadenet.CascadeNet(3, 1).to(device)
 
@@ -144,6 +144,9 @@ def train():
         model = my_drsnet.MultiscaleSENetA_direct_skip(in_ch=3, out_ch=1).to(device)
     elif args.choose_net == "SEResNet":
         model = my_drsnet.SEResNet18(in_ch=3, out_ch=1).to(device)
+    elif args.choose_net == "bottleneck_res18":
+        model = my_drsnet.ResNet18().to(device)
+
 
     elif args.choose_net == "resnext_unet":
         model = resnext_unet.resnext50(in_ch=3,out_ch=1).to(device)
@@ -191,7 +194,7 @@ def train():
         model.load_state_dict(torch.load(args.weight))
 
     elif loadpretrained==2:
-        model = my_drsnet.MultiscaleSENetA(in_ch=3,out_ch=1).to(device)
+        model = lednet.Net(num_classes=1).to(device)
         model_dict=model.state_dict()
         pretrained_dict = torch.load(args.weight)
         pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
@@ -211,9 +214,9 @@ def train():
     batch_size = args.batch_size
 
     # 加载数据集
-    liver_dataset = LiverDataset("data/train_camvid/", transform=x_transform, target_transform=y_transform)
+    liver_dataset = LiverDataset("data/train_Icome_randomrain/", transform=x_transform, target_transform=y_transform)
     len_img = liver_dataset.__len__()
-    dataloader = DataLoader(liver_dataset, batch_size=batch_size, shuffle=True, num_workers=24)
+    dataloader = DataLoader(liver_dataset, batch_size=batch_size, shuffle=True, num_workers=0)
 
 
     # DataLoader:该接口主要用来将自定义的数据读取接口的输出或者PyTorch已有的数据读取接口的输入按照batch size封装成Tensor
@@ -231,7 +234,7 @@ def train():
     # 每n个epoches来一次余弦退火
     cosine_lr_scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=10*int(len_img/batch_size), eta_min=0.00001)
 
-    multiclass = 1
+    multiclass = 0
     if multiclass==1:
         # 损失函数
         class_weights =np.array([0.,6.3005947,4.31063664,34.09234699,50.49834979,3.88280945,
@@ -258,7 +261,7 @@ def test_img(src_path, label_path):
     model_enet = enet.ENet(num_classes=1).to(device)
     model_segnet = segnet.SegNet(3, 1).to(device)
     model_my_mulSE_A = my_drsnet.MultiscaleSENetA(3, 1).to(device)
-    model_my_mulSE_B = my_drsnetmy_drsnet.MultiscaleSENetB(3, 1).to(device)
+    model_my_mulSE_B = my_drsnet.MultiscaleSENetB(3, 1).to(device)
     model_my_mulSE_C = my_drsnet.MultiscaleSENetC(3, 1).to(device)
     model_my_mulSE_A_direct_skip=my_drsnet.MultiscaleSENetA_direct_skip(3, 1).to(device)
     model_SEResNet18 =my_drsnet.SEResNet18(in_ch=3, out_ch=1).to(device)
@@ -464,7 +467,7 @@ def test():
     if args.choose_net=="My_Unet":
         model = my_unet.My_Unet2(3, 1).to(device)
     elif args.choose_net=="Enet":
-        model = enet.ENet(num_classes=13).to(device)
+        model = enet.ENet(num_classes=1).to(device)
     elif args.choose_net=="Segnet":
         model = segnet.SegNet(3,1).to(device)
     elif args.choose_net == "CascadNet":
@@ -512,20 +515,20 @@ def test():
         model = edanet.EDANet(classes=1).to(device)
     elif args.choose_net == "erfnet":
         model = erfnet.ERFNet(classes=1).to(device)
-    dsize = (1, 3, 128, 192)
-    inputs = torch.randn(dsize).to(device)
-    total_ops, total_params = profile(model, (inputs,), verbose=False)
-    print(" %.2f | %.2f" % (total_params / (1000 ** 2), total_ops / (1000 ** 3)))
+    # dsize = (1, 3, 128, 192)
+    # inputs = torch.randn(dsize).to(device)
+    # total_ops, total_params = profile(model, (inputs,), verbose=False)
+    # print(" %.2f | %.2f" % (total_params / (1000 ** 2), total_ops / (1000 ** 3)))
 
     model.load_state_dict(torch.load(args.weight))
-    liver_dataset = LiverDataset("data/val_camvid", transform=x_transform, target_transform=y_transform)
+    liver_dataset = LiverDataset("data/val_Icome_randomrain", transform=x_transform, target_transform=y_transform)
     dataloaders = DataLoader(liver_dataset)  # batch_size默认为1
     model.eval()
 
-    metric = SegmentationMetric(13)
+    metric = SegmentationMetric(2)
     # import matplotlib.pyplot as plt
     # plt.ion()
-    multiclass=1
+    multiclass=0
     mean_acc,mean_miou=[],[]
 
     alltime=0.0
@@ -622,15 +625,15 @@ def test():
             mean_miou.append(mIoU)
             # print(acc, mIoU,confusionMatrix)
             print(acc, mIoU)
-            plt.imshow(image*5)
-            plt.pause(0.1)
-            plt.show()
+            # plt.imshow(image*5)
+            # plt.pause(0.1)
+            # plt.show()
     # 计算时需封印acc和miou计算部分
 
     print("Took ",alltime , "seconds")
     print("Took",alltime/638.0, "s/perimage")
     print("FPS", 1/(alltime / 638.0))
-    print("average acc:%0.6f  average miou:%0.6f" % (np.mean(mean_acc), np.mean(mean_miou)))
+    print("Forground acc :%0.6f   average miou:%0.6f" % (np.mean(mean_acc), np.mean(mean_miou)))
 
 def train_dehaze_model(modeldehaze, modelsegmentation,criteriondehaze, criterionsegmentation,optimizerdehaze,optimizersegmentation,
                        dataloaddehaze,num_epochs=6):
@@ -877,16 +880,49 @@ if __name__ == '__main__':
     # camvid:
     # ENet:average acc:0.979088  average miou:0.273855 Took 0.011355369950758924 s/perimage FPS 104.43284640573941
 
+
+
+    #20200829
+    #UAS-addrain
+    # Enet Forground acc :0.973144   average miou:0.922673
+    # cgnet Forground acc :0.963803   average miou:0.903607
+    # *lednet Forground acc :0.976953   average miou:0.875229  failed loss around 0.3,can not decrease
+    # dfanet:Forground acc :0.759301   average miou:0.658991
+    # fddwnet Forground acc :0.937020   average miou:0.885300
+    # bisenet: Forground acc :0.954862   average miou:0.911307
+    # linknet Forground acc :0.978770   average miou:0.925679
+    # segnet Forground acc :0.975258   average miou:0.934445
+    # contextnet: Forground acc :0.967000   average miou:0.896782n
+    # pspnet :Forground acc :0.970889   average miou:0.940610
+    # Unet: Forground acc :0.979500   average miou:0.940960
+    # erfnet: Forground acc Forground acc :0.969660   average miou:0.913169:
+    # A:Forground acc :0.974335   average miou:0.921330
+    # B:Forground acc :0.963148   average miou:0.918707
+    # C:Forground acc :0.968283   average miou:0.920814
+    # my_drsnet_A_direct_skip: Forground acc :0.967880  average miou:0.924941
+    # SEResNet: Forground acc :0.965206  average miou:0.933964
+
+
+    # Icome-addrain
+    # Enet Forground acc :0.801656   average miou:0.827601
+    # cgnet:Forground acc :0.782515   average miou:0.792161
+    # lednet:failed
+    # dfanet main.py:892
+    # A: 0.837294    0.840054
+    # B: Forground acc :0.886311   average miou:0.831657
+    # C: Forground acc :0.843399   average miou:0.834281
+    # my_drsnet_A_direct_skip: Forground acc :0.834552   average miou:0.837232
     parser = argparse.ArgumentParser()  # 创建一个ArgumentParser对象
     parser.add_argument('--action', type=str,help='train or test or test_img or trainwithdehaze or testwithdehaze', default="train")  # 添加参数
     parser.add_argument('--lr', type=float, help='initial learning rate', default=0.008)  # 添加参数
     parser.add_argument('--choose_net', type=str,
                         help='erfnet or edanet or linknet or contextnet or fddwnet or espnet or bisenet or pspnet or cgnet or lednet or dfanet or trangle_net or'
-                             ' unet_nest or resnet50_unet or my_drsnet_A or my_drsnet_B or my_drsnet_C or my_drsnet_A_direct_skip or SEResNet or resnext_unet or Unet or My_Unet or Enet or Segnet or CascadNet or unet_res34',
-                        default="Enet")#can not work with class=1: espnet
+                             ' unet_nest or resnet50_unet or my_drsnet_A or my_drsnet_B or my_drsnet_C or my_drsnet_A_direct_skip or SEResNet or bottleneck_res18 resnext_unet or '
+                             'Unet or My_Unet or Enet or Segnet or CascadNet or unet_res34',
+                        default="my_drsnet_A")#can not work with class=1: espnet
     parser.add_argument('--batch_size', type=int, default=20)
     parser.add_argument('--num_epochs', type=int, default=20)
-    parser.add_argument('--weight', type=str, help='the path of the mode weight file', default="./weight/enet_weight.pth")
+    parser.add_argument('--weight', type=str, help='the path of the mode weight file', default="")
     parser.add_argument('--loss_record', type=str, help='the name of theloss_record file', default="enet_loss.csv")
     args = parser.parse_args()
     if args.choose_net == "Unet":
@@ -920,6 +956,10 @@ if __name__ == '__main__':
     elif args.choose_net == "SEResNet":
         args.weight = './weight/SEResNet_weight.pth'
         args.loss_record = "SEResNet_loss.csv"
+
+    elif args.choose_net == "bottleneck_res18":
+        args.weight = './weight/bottleneck_res18.pth'
+        args.loss_record = "bottleneck_res18_loss.csv"
 
 
 
@@ -979,10 +1019,15 @@ if __name__ == '__main__':
     elif args.action == 'test':
         test()
     elif args.action == 'test_img':
-        src_path = "./data/val_withrain/2.jpg"
-        label_path = "./data/val_withrain/2.png"
+        # src_path = "./000007/1.jpg"
+        # label_path = "./data/val_withrain/2.png"
+        src_path = "./data/val_Icome_randomrain/2.jpg"
+        label_path = "./data/val_Icome_randomrain/2.png"
         test_img(src_path,label_path)
     elif args.action == 'trainwithdehaze':
         trainwithdehaze()
     elif args.action == 'testwithdehaze':
         testwithdehaze()
+
+
+    # 1 2 4 5 6 7 9 10 11
