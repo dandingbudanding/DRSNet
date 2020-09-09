@@ -26,8 +26,8 @@ to get UAS-add-rain and BPS-add-rain datasets:
 link:https://pan.baidu.com/s/1zRcBd2vTuKFWTIsQJrbQnA 
 password: awfy
 
-to get pretrained weights of different scales on UAS-ad-rain and  BPS-ad-rain datasets:
-link: https://pan.baidu.com/s/1oMCSjPdQ4NT-dr2mLiFN6w  
-password: awfy
+to get pretrained weights of different scales on UAS-ad-rain and BPS-ad-rain datasets:
+link: https://pan.baidu.com/s/1Xv98jfHIJeyToV3PwfEJfQ  
+password: 0tt9
 
 any problems, please do not hesitate to contact with me, my email is 2463908977@qq.com.
