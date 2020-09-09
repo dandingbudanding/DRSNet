@@ -565,7 +565,6 @@ class ENet(nn.Module):
             stride=2,
             padding=1,
             bias=False)
-        self.lsm=nn.LogSoftmax(dim=1)
 
     def forward(self, x):
         # Initial block
@@ -611,7 +610,5 @@ class ENet(nn.Module):
         x = self.upsample5_0(x, max_indices1_0, output_size=stage1_input_size)
         x = self.regular5_1(x)
         x = self.transposed_conv(x, output_size=input_size)
-        # out = nn.Sigmoid()(x)  # 化成(0~1)区间
-        out = nn.Softmax2d()(x)  # 化成(0~1)区间
-        out =self.lsm(x)
+        out = nn.Sigmoid()(x)  # 化成(0~1)区间
         return out

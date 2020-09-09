@@ -261,7 +261,7 @@ class MultiscaleSE_block_A(nn.Module):
 
 class MultiscaleSE_block_B(nn.Module):
     def __init__(self,in_ch,out_ch):
-        super(MultiscaleSE_block_B,self).__init__()
+        super(Multi2scaleSE_block_B,self).__init__()
         self.in_ch=in_ch
         self.out_ch=out_ch
         out_ch_=out_ch//2
@@ -1380,9 +1380,9 @@ class SELayer(nn.Module):
         super(SELayer, self).__init__()
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Sequential(
-            nn.Linear(channel, channel // reduction, bias=False).cuda(),
+            nn.Linear(channel, channel // reduction, bias=False),
             nn.ReLU(inplace=True),
-            nn.Linear(channel // reduction, channel, bias=False).cuda(),
+            nn.Linear(channel // reduction, channel, bias=False),
             nn.Sigmoid()
         )
 
@@ -1454,12 +1454,12 @@ class SEPreActBootleneck(nn.Module):
 class SEResNet(nn.Module):
     def __init__(self,block,num_blocks,in_ch,out_ch,reduction=16):
         super(SEResNet, self).__init__()
-        self.in_planes = 24
-        self.conv1 = nn.Conv2d(in_ch, 24, kernel_size=3, stride=1, padding=1, bias=False)
-        self.layer1 = self._make_layer(block, 24, num_blocks[0], stride=1, reduction=reduction)
-        self.layer2 = self._make_layer(block, 48, num_blocks[1], stride=1, reduction=reduction)
-        self.layer3 = self._make_layer(block, 96, num_blocks[2], stride=1, reduction=reduction)
-        self.layer4 = self._make_layer(block, 192, num_blocks[3], stride=1, reduction=reduction)
+        self.in_planes=24
+        self.conv1 = nn.Conv2d(in_ch,24,kernel_size=3,stride=1,padding=1,bias=False)
+        self.layer1 = self._make_layer(block, 24, num_blocks[0], stride=1,reduction=reduction)
+        self.layer2 = self._make_layer(block, 48, num_blocks[1], stride=1,reduction=reduction)
+        self.layer3 = self._make_layer(block, 96, num_blocks[2], stride=1,reduction=reduction)
+        self.layer4 = self._make_layer(block, 192, num_blocks[3], stride=1,reduction=reduction)
         self.up5 = nn.Sequential(
             nn.Conv2d(192, 96, 1),
             nn.BatchNorm2d(96),
@@ -1565,109 +1565,3 @@ def test():
     net = SEResNet18()
     y = net((torch.randn(1,3,32,32)))
     print(y.size())
-
-
-
-
-# BottleNeck_Res18
-# 20200905
-
-class BottleNeck_ResBlk(nn.Module):
-    """
-    resnet block
-    """
-
-    def __init__(self, ch_in, ch_out):
-        super(BottleNeck_ResBlk, self).__init__()
-
-        self.conv1 = nn.Conv2d(ch_in, ch_in, kernel_size=1, stride=1, dilation=1, padding=0)
-        self.bn1 = nn.BatchNorm2d(ch_in)
-        self.conv2 = nn.Conv2d(ch_in, ch_in, kernel_size=3, stride=1, dilation=2, padding=2)
-        self.bn2 = nn.BatchNorm2d(ch_in)
-        self.conv3 = nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1, dilation=1, padding=0)
-        self.bn3 = nn.BatchNorm2d(ch_out)
-
-        self.extra = nn.Sequential()
-        if ch_out != ch_in:
-            # [b, ch_in, h, w] => [b, ch_out, h, w]
-            self.extra = nn.Sequential(
-                nn.Conv2d(ch_in, ch_out, kernel_size=1, stride=1),
-                nn.BatchNorm2d(ch_out)
-            )
-
-    def forward(self, x):
-        """
-        x:[b, ch, h, w]
-        """
-        out = F.relu(self.bn1(self.conv1(x)))
-        out = F.relu(self.bn2(self.conv2(out)))
-        out = self.bn3(self.conv3(out))
-        # short cut
-        # extra module: [b, ch_in, h, w] => [b, ch_out, h, w]
-        # element-wise add: [b, ch_in, h, w] with [b, ch_out, h, w]
-        out = F.relu(self.extra(x) + out)
-
-        return out
-
-
-class ResNet(nn.Module):
-    def __init__(self, ResidualBlock, num_classes=10):
-        super(ResNet, self).__init__()
-        self.inchannel = 48
-        self.conv1 = nn.Sequential(
-            nn.Conv2d(3, 48, kernel_size=3, stride=1, padding=1, bias=False),
-            nn.BatchNorm2d(48),
-            nn.ReLU(),
-        )
-
-        self.layer1 = self.make_layer(ResidualBlock, 48, 2, stride=1)
-        self.pool1 = nn.MaxPool2d(4)
-        self.layer2 = self.make_layer(ResidualBlock, 96, 2, stride=2)
-        self.pool2 = nn.MaxPool2d(2)
-        self.layer3 = self.make_layer(ResidualBlock, 192, 2, stride=2)
-        self.pool3 = nn.MaxPool2d(2)
-        self.layer4 = self.make_layer(ResidualBlock, 384, 2, stride=2)
-        # self.pool4 = nn.MaxPool2d(2)
-        # self.fc = nn.Linear(512, num_classes)
-        self.up1 = nn.ConvTranspose2d(384, 192, 2, stride=2)
-        self.decoder1 = DoubleConv(384, 192)
-        self.up2 = nn.ConvTranspose2d(192, 96, 2, stride=2)
-        self.decoder2 = DoubleConv(192, 96)
-        self.up3 = nn.ConvTranspose2d(96, 48, 4, stride=4)
-        self.decoder3 = DoubleConv(96, 48)
-        # self.up4 = nn.ConvTranspose2d(192, 96, 2, stride=2)
-        # self.decoder4 = DoubleConv(192, 96)
-        self.convfinal = nn.Conv2d(48, 1,kernel_size=3,padding=1)
-
-    def make_layer(self, block, channels, num_blocks, stride):
-        # strides = [stride] + [1] * (num_blocks - 1)  # strides=[1,1]
-        layers = []
-        for stride in range(num_blocks):
-            layers.append(block(self.inchannel, channels))
-            self.inchannel = channels
-        return nn.Sequential(*layers)
-
-    def forward(self, x):
-        c0 = self.conv1(x)
-
-        c1 = self.layer1(c0)
-        c1_pool = self.pool1(c1)
-        c2 = self.layer2(c1_pool)
-        c2_pool = self.pool2(c2)
-        c3 = self.layer3(c2_pool)
-        c3_pool = self.pool3(c3)
-        c4 = self.layer4(c3_pool)
-
-        c5_up = torch.cat([self.up1(c4), c3], dim=1)
-        c5 = self.decoder1(c5_up)
-        c6_up = torch.cat([self.up2(c5), c2], dim=1)
-        c6 = self.decoder2(c6_up)
-        c7_up = torch.cat([self.up3(c6), c1], dim=1)
-        c7 = self.decoder3(c7_up)
-        out = self.convfinal(c7)
-        out = nn.Sigmoid()(out)
-        return out
-
-
-def ResNet18():
-    return ResNet(BottleNeck_ResBlk)
