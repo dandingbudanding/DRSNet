@@ -1,8 +1,8 @@
 # rename the images of UAS dataset
 import os
 from random import shuffle
-src_path="../UAS Dataset/UAS(UESTC All-day Scenery)/src"
-label_path="../UAS Dataset/UAS(UESTC All-day Scenery)/label"
+src_path="./src"
+label_path="./label"
 
 
 class BatchRename():
@@ -18,7 +18,7 @@ class BatchRename():
         filelist = os.listdir(self.pathsrc) #获取文件路径
         shuffle(filelist)
         total_num = len(filelist) #获取文件长度（个数）
-        i = 1  #表示文件的命名是从1开始的
+        i = 0  #表示文件的命名是从1开始的
         for item in filelist:
             if item.endswith('.jpg'):  #初始的图片的格式为jpg格式的（或者源文件是png格式及其他格式，后面的转换格式就可以调整为自己需要的格式即可）
                 img_src = os.path.join(os.path.abspath(self.pathsrc), item)

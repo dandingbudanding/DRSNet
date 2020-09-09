@@ -1,9 +1,7 @@
-import cv2
-import numpy as np
 import os
-
 import cv2
 import numpy as np
+import random
 
 
 def get_noise(img, value=10):
@@ -16,7 +14,7 @@ def get_noise(img, value=10):
 
     noise = np.random.uniform(0, 256, img.shape[0:2])
     # 控制噪声水平，取浮点数，只保留最大的一部分作为噪声
-    v = value * 0.01
+    v = value
     noise[np.where(noise < (256 - v))] = 0
 
     # 噪声做初次模糊
@@ -111,23 +109,40 @@ def add_rain(rain, img, alpha=0.9):
 
 
 if __name__ == '__main__':
-    train_path= "../data/train_Icome"
-    test_path = "../data/val_Icome"
+    train_path= "../data/train_Icome_randomrain"
+    test_path = "../data/val_Icome_randomrain"
 
-    src_path="../../Icomedataset/icome_task2_data/clean_images/images"
-    label_path="../../Icomedataset/icome_task2_data/clean_images/profiles"
+    src_path="/media/opt/Elements/学习/20200319车道线分割/Icomedataset/icome_task2_data/clean_images/images"
+    label_path="/media/opt/Elements/学习/20200319车道线分割/Icomedataset/icome_task2_data/clean_images/profiles"
+    # src_path = "/media/opt/Elements/学习/20200319车道线分割/UAS Dataset/UAS(UESTC All-day Scenery)/src"
+    # label_path = "/media/opt/Elements/学习/20200319车道线分割/UAS Dataset/UAS(UESTC All-day Scenery)/label"
+    # "/media/opt/Elements/学习/20200318车道线分割/proj/data"
 
+    # /media/opt/Elements/学习/20200319车道线分割/UAS Dataset/UAS(UESTC All-day Scenery)/src
+    #/media/opt/Elements/学习/20200319车道线分割/UAS Dataset/UAS(UESTC All-day Scenery)/label
     src_all=os.listdir(src_path)
     lenof_src=len(src_all)
     test_num=int(lenof_src*0.1)  #分多少给测试集
+    flag="Icome"
     for _,file in enumerate(src_all):
         img=cv2.imread(os.path.join(src_path,file))
-        label=cv2.imread(os.path.join(label_path,file[:-4]+"-profile.jpg"),0) #0:origin 1:bgr
-        label=(~label)//150
-        noise = get_noise(img, value=800)
-        rain = rain_blur(noise, length=50, angle=-30, w=3)
-        img_addrain=alpha_rain(rain, img, beta=0.8)  # 方法一，透明度赋值
+        if flag=="Icome":
+            label=cv2.imread(os.path.join(label_path,file[:-4]+"-profile.jpg"),0) #0:origin 1:bgr
+            label = (~label)//150
+        elif flag=="UAS":
+            label=cv2.imread(os.path.join(label_path,file[:-4]+".png"),0) #0:origin 1:bgr
+            label = (~(label*255))//255
+
+        noise_=random.randint(6,11)
+        length_=random.randint(40,60)
+        angle_=-random.randint(-30,30)
+        w_ = random.randrange(3,7,2)
+        beta_= random.uniform(0.6,0.9)
+        noise = get_noise(img, value=noise_)
+        rain = rain_blur(noise, length=length_, angle=angle_, w=w_)
+        img_addrain=alpha_rain(rain, img, beta=beta_)  # 方法一，透明度赋值
         if _<test_num:
+            # print(os.path.join(test_path,str(_)+".jpg"))
             cv2.imwrite(os.path.join(test_path,str(_)+".jpg"),img_addrain)
             cv2.imwrite(os.path.join(test_path, str(_)+ ".png"), label)
         else:
