@@ -7,12 +7,12 @@ environments:
 Ubuntu18.04
 torch 1.1.0  CUDA10.1
 
-for train：
+For train：
 sudo python3 --action="train" --choose_net="NET"
 NET: is the parameter you can choose in main.py file, you also can change the parameters directly in main.py file.
 for example:sudo python3 main.py --action="train" --choose_net="my_drsnet_A"
 
-for test:
+For test:
 sudo python3 --action="test" --choose_net="NET"
 for example:sudo python3 main.py --action="test" --choose_net="my_drsnet_A"
 
