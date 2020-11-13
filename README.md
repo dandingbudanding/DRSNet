@@ -30,4 +30,6 @@ to get pretrained weights of different scales on UAS-ad-rain and BPS-ad-rain dat
 link: https://pan.baidu.com/s/1Xv98jfHIJeyToV3PwfEJfQ  
 password: 0tt9
 
+the article related to this code is available here:https://link.springer.com/article/10.1007/s11554-020-01042-2?wt_mc=Internal.Event.1.SEM.ArticleAuthorOnlineFirst&utm_source=ArticleAuthorOnlineFirst&utm_medium=email&utm_content=AA_en_06082018&ArticleAuthorOnlineFirst_20201103
+
 any problems, please do not hesitate to contact with me, my email is 2463908977@qq.com.
